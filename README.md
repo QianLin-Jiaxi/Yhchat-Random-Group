@@ -1,0 +1,2 @@
+# Yhchat-Random-Group
+提供一个可作为API接入同时也可作为UI窗口跳转到随机云湖群聊的php脚本
