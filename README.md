@@ -4,9 +4,9 @@
 #### 若网址被墙或出现故障请联系我
 > **访问URL:** https://randomyhgroup.xo.je  
 > **ui参数:** 是否使用UI模式，1-使用UI模式，其他-API调用模式  
-> **API模式链接实例:** https://randomyhgroup.xo.je  
-> **UI模式链接实例:** https://randomyhgroup.xo.je?ui=1  
+> **API模式链接实例:** https://yhapi.qianlinjiaxi.qzz.io/randomyhgroup.php  
+> **UI模式链接实例:** https://yhapi.qianlinjiaxi.qzz.io/randomyhgroup.php?ui=1  
 > \-  
 > **以下为我们部署的特殊功能参数：(开源源码不包含以下功能)**  
-> **获取使用次数:** https://randomyhgroup.xo.je/?count=get  
+> **获取使用次数:** https://yhapi.qianlinjiaxi.qzz.io/randomyhgroup.php?count=get  
 #### 切勿使用此功能进行非法活动！后果由使用此者承担
