@@ -1,0 +1,201 @@
+<?php
+// 处理API请求获取群组数据
+function fetchGroups() {
+    $url = 'https://chat-go.jwzhd.com/v1/group/recommend/list';
+    $postData = json_encode([
+        'categoryId' => 0,
+        'keyword' => ''
+    ]);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen($postData)
+    ]);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpCode !== 200 || !$response) {
+        return null;
+    }
+    
+    return json_decode($response, true);
+}
+
+// 随机选择一个群组
+function getRandomGroup() {
+    $data = fetchGroups();
+    
+    if (!$data || $data['code'] !== 1 || empty($data['data']['groups'])) {
+        return null;
+    }
+    
+    $groups = $data['data']['groups'];
+    $randomIndex = array_rand($groups);
+    
+    return $groups[$randomIndex];
+}
+
+// 判断是否为UI模式
+$isUIMode = isset($_GET['ui']) && $_GET['ui'] == 1;
+
+if ($isUIMode) {
+    // UI模式：显示HTML界面
+    ?>
+    <!DOCTYPE html>
+    <html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>随机群组跳转</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                background-color: #f0f2f5;
+            }
+            .container {
+                text-align: center;
+                padding: 40px;
+                background-color: white;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            h1 {
+                color: #333;
+                margin-bottom: 30px;
+            }
+            .btn {
+                background-color: #007bff;
+                color: white;
+                border: none;
+                padding: 15px 40px;
+                font-size: 18px;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+                margin: 10px;
+            }
+            .btn:hover {
+                background-color: #0056b3;
+            }
+            .result {
+                margin-top: 30px;
+                padding: 20px;
+                background-color: #f8f9fa;
+                border-radius: 5px;
+                display: none;
+            }
+            .group-info {
+                text-align: left;
+                margin: 15px 0;
+            }
+            .loading {
+                display: none;
+                margin-top: 20px;
+            }
+            .error {
+                color: #dc3545;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>随机群组跳转</h1>
+            <button class="btn" id="randomBtn">随机选择一个群组</button>
+            
+            <div class="loading" id="loading">
+                正在获取群组数据...
+            </div>
+            
+            <div class="result" id="result">
+                <div class="group-info">
+                    <strong>群组名称：</strong><span id="groupName"></span><br>
+                    <strong>群组ID：</strong><span id="groupId"></span><br>
+                    <strong>群组介绍：</strong><span id="groupIntro"></span><br>
+                    <strong>成员数量：</strong><span id="memberCount"></span>
+                </div>
+                <button class="btn" id="jumpBtn" style="background-color: #28a745;">跳转到群组</button>
+            </div>
+            
+            <div class="error" id="error"></div>
+        </div>
+        
+        <script>
+            document.getElementById('randomBtn').addEventListener('click', function() {
+                // 显示加载中
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('result').style.display = 'none';
+                document.getElementById('error').textContent = '';
+                
+                // 发送请求获取随机群组
+                fetch(window.location.pathname + '?api=1', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应错误');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // 隐藏加载中
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // 显示结果
+                    document.getElementById('groupName').textContent = data.name;
+                    document.getElementById('groupId').textContent = data.groupId;
+                    document.getElementById('groupIntro').textContent = data.introduction;
+                    document.getElementById('memberCount').textContent = data.headcount;
+                    
+                    // 设置跳转链接
+                    const jumpUrl = `yunhu://jwznb.com?ct=2&id=${data.groupId}`;
+                    document.getElementById('jumpBtn').onclick = function() {
+                        window.location.href = jumpUrl;
+                    };
+                    
+                    // 显示结果区域
+                    document.getElementById('result').style.display = 'block';
+                })
+                .catch(error => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error').textContent = '获取群组数据失败，请重试。错误：' + error.message;
+                });
+            });
+        </script>
+    </body>
+    </html>
+    <?php
+} else {
+    // API模式：返回JSON数据
+    header('Content-Type: application/json; charset=utf-8');
+    
+    $randomGroup = getRandomGroup();
+    
+    if ($randomGroup) {
+        echo json_encode($randomGroup, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    } else {
+        http_response_code(500);
+        echo json_encode([
+            'error' => true,
+            'message' => '无法获取群组数据'
+        ], JSON_UNESCAPED_UNICODE);
+    }
+}
+?>
