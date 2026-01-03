@@ -5,5 +5,8 @@
 > **访问URL:** https://randomyhgroup.xo.je  
 > **ui参数:** 是否使用UI模式，1-使用UI模式，其他-API调用模式  
 > **API模式链接实例:** https://randomyhgroup.xo.je  
-> **UI模式链接实例:** https://randomyhgroup.xo.je?ui=1  
+> **UI模式链接实例:** https://randomyhgroup.xo.je?ui=1
+> \-  
+> **以下为我们部署的特殊功能参数：(开源源码不包含以下功能)**  
+> **获取使用次数:** https://randomyhgroup.xo.je/?count=get  
 #### 切勿使用此功能进行非法活动！后果由使用此者承担
